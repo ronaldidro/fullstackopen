@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import axios from "axios";
+import Countries from "./components/Countries";
+import CountryData from "./components/CountryData";
 
 function App() {
   
@@ -8,49 +10,24 @@ function App() {
 
   const handleFilterChange = (event) => {
     setFilter(event.target.value)
-    fetchCountries(event.target.value)
+    if(event.target.value) fetchCountries(event.target.value) 
+    else setCountries([])
   }
   
-  const fetchCountries = (pref) => {
+  const fetchCountries = (value) => {
     axios
-      .get(`https://restcountries.com/v2/name/${pref}`)
+      .get(`https://restcountries.com/v2/name/${value}`)
       .then(response => {
-        console.log('response', response.data);
         setCountries(response.data);
       })
   }
 
-  console.log('countries', countries);
-
-  const showContent = () => {
-    if(countries.length > 10) return <p>Too many matches, specify another filter</p>
-    if(countries.length > 1 && countries.length <= 10) {
-      return (
-        countries.map(country => (
-          <p key={country.alpha2Code}>{country.name}</p>
-        ))
-      )
-    }
-    if(countries.length === 1) {
-      console.log('entre');
-      <div>
-        <h1>countries[0]</h1>
-      </div>
-    }
-  }
-
-  useEffect(() => {
-    axios
-      .get('https://restcountries.com/v2/all')
-      .then(response => {
-        console.log('response', response);
-      })
-  }, []);
-
   return (
     <div>
       find countries <input value={filter} onChange={handleFilterChange} />
-      {showContent()}
+      {countries.length > 10 && <p>Too many matches, specify another filter</p>}
+      {countries.length > 1 && countries.length <= 10 && <Countries countries={countries} />}
+      {countries.length === 1 && <CountryData country={countries[0]} />}
     </div>    
   );
 }
