@@ -51,6 +51,9 @@ const App = () => {
           setNewName('')
           setNewNumber('')
         })
+        .catch(error => {
+          showMessage(`${error.response.data.error}`, 'error')
+        })
     }
   }
 
@@ -72,14 +75,18 @@ const App = () => {
       personService
         .update(id, changePerson)
         .then(returnedPerson => {
-          setPersons(persons.map(person => person.id !== id ? person : returnedPerson))
-          showMessage(`Replaced number of ${newName}`, 'success')
-          setNewName('')
-          setNewNumber('')
+          if(returnedPerson){
+            setPersons(persons.map(person => person.id !== id ? person : returnedPerson))
+            showMessage(`Replaced number of ${newName}`, 'success')
+            setNewName('')
+            setNewNumber('')
+          } else {
+            showMessage(`Information of ${newName} has already been removed from server`, 'error')
+            setPersons(persons.filter(p => p.id !== id))
+          }
         })
-        .catch(() => {
-          showMessage(`Information of ${newName} has already been removed from server`, 'error')
-          setPersons(persons.filter(p => p.id !== id))
+        .catch(error => {
+          showMessage(`${error.response.data.error}`, 'error')
         })
     }
   }
