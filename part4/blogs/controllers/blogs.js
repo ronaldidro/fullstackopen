@@ -56,6 +56,24 @@ blogsRouter.post('/', async (request, response) => {
   response.status(201).json(blogInfo)
 })
 
+blogsRouter.post('/:id/comments', async (request, response) => {  
+  if (!request.body.comment) {
+    return response.status(401).json({ 
+      error: 'comment is missing or invalid'
+    })
+  }
+
+  const blog = { 
+    ["$addToSet"]: { comments: request.body.comment } 
+  }
+  
+  const commentedBlog = await Blog
+    .findByIdAndUpdate(request.params.id, blog, { new: true })
+    .populate('user', { username: 1, name: 1 })
+
+  response.json(commentedBlog)
+})
+
 blogsRouter.delete('/:id', async (request, response) => {
   const blog = await Blog.findById(request.params.id)
   const decodedToken = verifyToken(request.token)
@@ -82,11 +100,11 @@ blogsRouter.put('/:id', async (request, response) => {
     likes: body.likes
   }
 
-  const updatedNote = await Blog
+  const updatedBlog = await Blog
     .findByIdAndUpdate(request.params.id, blog, { new: true })
     .populate('user', { username: 1, name: 1 })
     
-  response.json(updatedNote)
+  response.json(updatedBlog)
 })
 
 module.exports = blogsRouter
